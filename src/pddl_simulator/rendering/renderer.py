@@ -547,7 +547,7 @@ class Renderer:
 
                 for arm in drone.arms:
 
-                    if arm.content == "empty":
+                    if arm.content is None:
                         continue
 
                     box = arm.content

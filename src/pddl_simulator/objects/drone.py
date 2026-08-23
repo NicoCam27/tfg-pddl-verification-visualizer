@@ -1,9 +1,3 @@
-# POSIBLES MEJORAS O CAMBIOS:
-
-# - Al recoger y dejar una caja, en vez de mencionar el brazo por su nombre, pasar directamente el objeto brazo, para evitar errores
-#   de que el nombre del brazo no exista o esté mal escrito.
-#   Esto también haría que el código sea más limpio, porque no habría que recorrer la lista de brazos para encontrar el brazo con ese nombre.
-
 #El objeto de tipo "drone" tiene "ubicacion" (un string) y "brazos" (puede tener uno o varios brazos,
 #                                                                   cada brazo puede tener una caja o no tener nada)
 class Drone:
@@ -60,7 +54,7 @@ class Drone:
         arm_occupied = False
 
         if arm in self.arms:
-            if arm.content != "empty":
+            if arm.content is not None:
                 arm_occupied = True
                 raise ValueError(f"the arm {arm.name} is already occupied - it has {arm.content}")
             else:
@@ -78,10 +72,7 @@ class Drone:
 
 
     # Cuando se descarga una caja y se entrega a una persona,
-
-    # -----------  QUIZÁS CAMBIARLO A QUE LA CAJA QUEDE EN LA UBICACIÓN DE LA PERSONA, ASÍ TIENE MÁS SENTIDO!
-    
-    # el brazo queda vacío y la caja queda en la ubicación del drone donde la ha descargado.
+    # el brazo queda vacío y la caja queda en la ubicación de la persona a la que se le ha entregado la caja.
     #
     # Se verifica que el drone y la persona estén en la misma ubicación,
     # que la persona necesite el contenido de esa caja (necesidad de la persona = contenido de la caja)
@@ -97,7 +88,7 @@ class Drone:
                 raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
             if not box.release(self):
                 raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
-            arm.content = "empty"
+            arm.content = None
             box.location = person.location
             if (not box.delivered_to(person)):
                 raise ValueError(f"the box {box.name} couldn't be delivered to {person.name}, the box's owner is {box.get_current_owner().name}")
@@ -118,7 +109,7 @@ class Drone:
             if not box.release(self):
                 raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
 
-            arm.content = "empty"
+            arm.content = None
             box.location = self.location
             print(f"The box {box.name} has been dropped from the arm {arm.name} of the drone {self.name} in the location {self.location}")
             return duration, cost
@@ -145,7 +136,7 @@ class Drone:
                 raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
             if conveyor.get_number_of_boxes_inside() == conveyor.capacity:
                 raise ValueError(f"the conveyor {conveyor.name} has reached its maximum capacity = {conveyor.capacity}")
-            arm.content = "empty"
+            arm.content = None
             # Se verifica que se haya podido cargar correctamente la caja en el transportador y de que no se está intentando
             # meter una caja que ya está dentro del transportador.
             if (not box.release(self)):
@@ -176,7 +167,7 @@ class Drone:
         elif self.location != conveyor.location:
             raise ValueError(f"the drone {self.name} is not in the same location ({self.location}) the conveyor {conveyor.name} is in ({conveyor.location})")
         if arm in self.arms:
-            if arm.content != "empty":
+            if arm.content is not None:
                 raise ValueError(f"the arm {arm.name} is already occupied - it has {arm.content}")
             if (not box.release(conveyor)):
                 raise ValueError(f"the box {box.name} is not owned by the transporter {conveyor.name}, it is owned by {box.get_current_owner().name}")

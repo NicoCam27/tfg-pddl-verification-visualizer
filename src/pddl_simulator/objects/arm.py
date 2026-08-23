@@ -1,7 +1,7 @@
-#El objeto de brazo es un objeto que puede tener una caja o no tener nada, y se representa como un string (el nombre de la caja o "empty")
+#El objeto de brazo es un objeto que puede tener una caja, un transportador o None
 class Arm:
 
-    def __init__(self, name, content = "empty"):
+    def __init__(self, name, content = None):
 
         self.name = name
         self.content = content

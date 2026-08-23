@@ -79,6 +79,7 @@ class Conveyor:
         self._location = new_location
         for box in self.boxes_inside:
             box.location = new_location
+    
     #RESET
     def reset(self):
         self.capacity = self.__initial_capacity
