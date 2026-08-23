@@ -48,7 +48,7 @@ class Renderer:
 
         for drone in drones:
             for arm in drone.arms:
-                if arm.content == box.name:
+                if arm.content == box:
                     return True
 
         return False
@@ -80,35 +80,193 @@ class Renderer:
             self.screen.blit(text, rect)
 
         
+#        # Dibujar Cajas
+#        if boxes is not None:
+#            for box in boxes:
+#
+#                # -------------------------------------------------
+#                # No dibujar cajas que lleva un dron
+#                # -------------------------------------------------
+#                if self.is_box_carried(box, drones):
+#                    continue
+#
+#                # -------------------------------------------------
+#                # No dibujar cajas que están dentro de un transportador
+#                # -------------------------------------------------
+#                if self.is_box_in_conveyor(box, conveyors):
+#                    continue
+#
+#                # -------------------------------------------------
+#                # Dibujar cajas que están libres
+#                # -------------------------------------------------
+#                if box.location not in self.location_positions:
+#                    continue
+#
+#                x, y = self.location_positions[box.location]
+#
+#                pygame.draw.rect(
+#                    self.screen,
+#                    (180, 120, 0),
+#                    (x - 10, y + 40, 20, 20)
+#                )
+                
+
         # Dibujar Cajas
         if boxes is not None:
+
+            # ---------------------------------------------------------
+            # Agrupar las cajas por ubicación
+            # ---------------------------------------------------------
+            boxes_by_location = defaultdict(list)
+
             for box in boxes:
 
-                # -------------------------------------------------
-                # No dibujar cajas que lleva un dron
-                # -------------------------------------------------
+                # No incluir cajas que lleva un dron
                 if self.is_box_carried(box, drones):
                     continue
 
-                # -------------------------------------------------
-                # No dibujar cajas que están dentro de un transportador
-                # -------------------------------------------------
+                # No incluir cajas dentro de un transportador
                 if self.is_box_in_conveyor(box, conveyors):
                     continue
 
-                # -------------------------------------------------
-                # Dibujar cajas que están libres
-                # -------------------------------------------------
+                # Ignorar ubicaciones que no existen en el mapa
                 if box.location not in self.location_positions:
                     continue
 
-                x, y = self.location_positions[box.location]
+                boxes_by_location[box.location].append(box)
 
-                pygame.draw.rect(
-                    self.screen,
-                    (180, 120, 0),
-                    (x - 10, y + 40, 20, 20)
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+
+            # ---------------------------------------------------------
+            # Dibujar las cajas
+            # ---------------------------------------------------------
+            for location, boxes_in_location in boxes_by_location.items():
+
+                x, y = self.location_positions[location]
+
+                # Dibujar todas las cajas de esta ubicación
+                for i, box in enumerate(boxes_in_location):
+
+                    # Por ahora las dibujamos unas encima de otras
+                    # exactamente en la misma posición
+                    box_rect = pygame.Rect(
+                        x - 10,
+                        y + 40,
+                        20,
+                        20
+                    )
+
+                    pygame.draw.rect(
+                        self.screen,
+                        (180, 120, 0),
+                        box_rect
+                    )
+
+                # -----------------------------------------------------
+                # Tooltip al pasar el ratón por encima de una caja
+                # -----------------------------------------------------
+                #
+                # Como todas las cajas están en la misma posición,
+                # cualquier caja de esa ubicación activa el tooltip.
+                #
+                box_rect = pygame.Rect(
+                    x - 10,
+                    y + 40,
+                    20,
+                    20
                 )
+
+                if box_rect.collidepoint(mouse_x, mouse_y):
+
+                    lines = [
+                        f"Cajas no entregadas en {location}:"
+                    ]
+
+                    for box in boxes_in_location:
+                        if box.get_current_owner() is None:
+                            lines.append(
+                                f"{box.name} | {box.content}"
+                            )
+
+                    # Si hay cajas sin entregar, se muestra el tooltip
+                    if len(lines) > 1:
+
+                        padding = 6
+                        line_height = 20
+
+                        width = max(
+                            self.small_font.size(line)[0]
+                            for line in lines
+                        ) + padding * 2
+
+                        height = (
+                            len(lines) * line_height
+                            + padding * 2
+                        )
+
+                        tooltip_x = box_rect.right + 10
+                        tooltip_y = box_rect.top
+
+                        # Evitar que salga por la derecha
+                        if tooltip_x + width > self.width:
+                            tooltip_x = (
+                                box_rect.left
+                                - width
+                                - 10
+                            )
+
+                        # Evitar que salga por abajo
+                        if tooltip_y + height > self.height:
+                            tooltip_y = (
+                                self.height
+                                - height
+                                - 10
+                            )
+
+                        # Fondo
+                        pygame.draw.rect(
+                            self.screen,
+                            (255, 255, 220),
+                            (
+                                tooltip_x,
+                                tooltip_y,
+                                width,
+                                height
+                            )
+                        )
+
+                        # Borde
+                        pygame.draw.rect(
+                            self.screen,
+                            (0, 0, 0),
+                            (
+                                tooltip_x,
+                                tooltip_y,
+                                width,
+                                height
+                            ),
+                            1
+                        )
+
+                        
+                        # Texto
+                        for i, line in enumerate(lines):
+
+                            text = self.small_font.render(
+                                line,
+                                True,
+                                (0, 0, 0)
+                            )
+
+                            self.screen.blit(
+                                text,
+                                (
+                                    tooltip_x + padding,
+                                    tooltip_y
+                                    + padding
+                                    + i * line_height
+                                )
+                            )
 
         # Dibujar transportadores
         if conveyors is not None:
@@ -408,7 +566,7 @@ class Renderer:
 
                     # Información de la caja
                     txt = self.small_font.render(
-                        f"{arm.name} | {arm.content}",
+                        f"{arm.name} | {arm.content.name}",
                         True,
                         (150, 0, 0)
                     )

@@ -2,6 +2,7 @@
 class Box:
     AVAILABLE = "available"
     CARRIED = "carried"
+    DELIVERED = "delivered"
 
     def __init__(self, name, location = "", content = ""):
         self.name = name
@@ -29,6 +30,14 @@ class Box:
         self.__current_owner = None
         return True
     
+    def delivered_to(self, person):
+        if self.__state != self.AVAILABLE:
+            return False
+
+        self.__state = self.DELIVERED
+        self.__current_owner = person
+        return True
+
     def __str__(self):
         return f"Box(name={self.name}, location={self.location}, content={self.content})"
     

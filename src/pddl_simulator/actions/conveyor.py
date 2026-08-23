@@ -10,19 +10,19 @@ def create_action_move_conveyor(drone, conveyor, origin, destination, start, dur
     return Action(start=start, duration=duration, description=description, action_type="move_conveyor", data=data, on_finish=lambda: drone.move_conveyor(conveyor, origin, destination, duration, cost))
 
     
-def create_action_load_conveyor_with_box(drone, arm_name, box, conveyor, start, duration = 1, cost = 1, description=""):
+def create_action_load_conveyor_with_box(drone, arm, box, conveyor, start, duration = 1, cost = 1, description=""):
         
     if description == "":
-            description = f'{drone.name}.load_conveyor_with_box(arm_name="{arm_name}", box={box.name}, conveyor={conveyor.name}, duration={duration}, cost={cost})'
+            description = f'{drone.name}.load_conveyor_with_box(arm="{arm}", box={box.name}, conveyor={conveyor.name}, duration={duration}, cost={cost})'
 
-    data = {"action_type": "load_conveyor_with_box", "drone": drone, "arm_name": arm_name, "box": box, "conveyor": conveyor}
-    return Action(start=start, duration=duration, description=description, data=data, on_finish=lambda: drone.load_conveyor_with_box(arm_name, box, conveyor, duration, cost))
+    data = {"action_type": "load_conveyor_with_box", "drone": drone, "arm": arm, "box": box, "conveyor": conveyor}
+    return Action(start=start, duration=duration, description=description, data=data, on_finish=lambda: drone.load_conveyor_with_box(arm, box, conveyor, duration, cost))
 
 
-def create_action_unload_box_from_conveyor(drone, arm_name, box, conveyor, start, duration = 1, cost = 1, description=""):
+def create_action_unload_box_from_conveyor(drone, arm, box, conveyor, start, duration = 1, cost = 1, description=""):
         
     if description == "":
-            description = f'{drone.name}.unload_box_from_conveyor(arm_name="{arm_name}", box={box.name}, conveyor={conveyor.name}, duration={duration}, cost={cost})'
+            description = f'{drone.name}.unload_box_from_conveyor(arm="{arm}", box={box.name}, conveyor={conveyor.name}, duration={duration}, cost={cost})'
 
-    data = {"action_type": "unload_box_from_conveyor", "drone": drone, "arm_name": arm_name, "box": box, "conveyor": conveyor}
-    return Action(start=start, duration=duration, description=description, data=data, on_finish=lambda: drone.unload_box_from_conveyor(arm_name, box, conveyor, duration, cost))
+    data = {"action_type": "unload_box_from_conveyor", "drone": drone, "arm": arm, "box": box, "conveyor": conveyor}
+    return Action(start=start, duration=duration, description=description, data=data, on_finish=lambda: drone.unload_box_from_conveyor(arm, box, conveyor, duration, cost))
