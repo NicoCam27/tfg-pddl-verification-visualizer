@@ -441,21 +441,25 @@ class Renderer:
 
                     for person in people_in_location:
 
-                        if person.possesses == "nothing":
+                        if person.possesses is None or person.possesses == []:
                             lines.append(person.name)
 
                         elif person.get_is_possesses_a_list():
-                            box_found = False
-                            if person.get_possesses_at_least_one_object():
+                            #box_found = False
+                            if person.possesses_at_least_one_object():
                                 for element in person.possesses:
-                                    if element != "nothing":
-                                        lines.append(
-                                            f"{person.name} | {element.name} | {element.content}"
-                                        )
-                                        box_found = True
+                                    lines.append(
+                                        f"{person.name} | {element.name} | {element.content}"
+                                    )
+                                    #box_found = True
+                                    #if element != "nothing":
+                                    #    lines.append(
+                                    #        f"{person.name} | {element.name} | {element.content}"
+                                    #    )
+                                    #    box_found = True
 
-                            if not box_found:
-                                lines.append(person.name)
+                            #if not box_found:
+                            #    lines.append(person.name)
 
                         else:
                             box = person.possesses
