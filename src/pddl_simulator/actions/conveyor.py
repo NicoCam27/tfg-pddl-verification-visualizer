@@ -13,7 +13,7 @@ def create_action_move_conveyor(drone, conveyor, origin, destination, start, dur
 def create_action_load_conveyor_with_box(drone, arm, box, conveyor, start, duration = 1, cost = 1, description=""):
         
     if description == "":
-            description = f'{drone.name}.load_conveyor_with_box(arm="{arm}", box={box.name}, conveyor={conveyor.name}, duration={duration}, cost={cost})'
+            description = f'{drone.name}.load_conveyor_with_box(arm={arm.name}, box={box.name}, conveyor={conveyor.name}, duration={duration}, cost={cost})'
 
     data = {"action_type": "load_conveyor_with_box", "drone": drone, "arm": arm, "box": box, "conveyor": conveyor}
     return Action(start=start, duration=duration, description=description, data=data, on_finish=lambda: drone.load_conveyor_with_box(arm, box, conveyor, duration, cost))
@@ -22,7 +22,7 @@ def create_action_load_conveyor_with_box(drone, arm, box, conveyor, start, durat
 def create_action_unload_box_from_conveyor(drone, arm, box, conveyor, start, duration = 1, cost = 1, description=""):
         
     if description == "":
-            description = f'{drone.name}.unload_box_from_conveyor(arm="{arm}", box={box.name}, conveyor={conveyor.name}, duration={duration}, cost={cost})'
+            description = f'{drone.name}.unload_box_from_conveyor(arm={arm.name}, box={box.name}, conveyor={conveyor.name}, duration={duration}, cost={cost})'
 
     data = {"action_type": "unload_box_from_conveyor", "drone": drone, "arm": arm, "box": box, "conveyor": conveyor}
     return Action(start=start, duration=duration, description=description, data=data, on_finish=lambda: drone.unload_box_from_conveyor(arm, box, conveyor, duration, cost))
