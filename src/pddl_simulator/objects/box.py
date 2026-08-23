@@ -11,11 +11,10 @@ class Box:
         self.__state = self.AVAILABLE
         self.__current_owner = None
 
-        self.__initial_current_owner = None
         self.__initial_location = location
 
     def try_pickup(self, obj):
-        if self.__state != self.AVAILABLE:
+        if self.__state != self.AVAILABLE and self.__state != self.DELIVERED:
             return False
 
         self.__state = self.CARRIED
@@ -31,7 +30,7 @@ class Box:
         return True
     
     def delivered_to(self, person):
-        if self.__state != self.AVAILABLE:
+        if self.__state != self.AVAILABLE and self.__state != self.DELIVERED:
             return False
 
         self.__state = self.DELIVERED
@@ -49,6 +48,6 @@ class Box:
 
     #RESET
     def reset(self):
-        self.__current_owner = self.__initial_current_owner
         self.location = self.__initial_location
         self.__state = self.AVAILABLE
+        self.__current_owner = None

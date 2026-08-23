@@ -85,7 +85,7 @@ class Drone:
 
         if arm in self.arms:
             if arm.content != box:
-                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
+                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. It is holding {arm.content}")
             if not box.release(self):
                 raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
             arm.content = None
@@ -105,7 +105,7 @@ class Drone:
     def drop(self, arm, box, duration = 1, cost = 1):
         if arm in self.arms:
             if arm.content != box:
-                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
+                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. It is holding {arm.content}")
             if not box.release(self):
                 raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
 
@@ -133,7 +133,7 @@ class Drone:
 
         if arm in self.arms:
             if arm.content != box:
-                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
+                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. It is holding {arm.content}")
             if conveyor.get_number_of_boxes_inside() == conveyor.capacity:
                 raise ValueError(f"the conveyor {conveyor.name} has reached its maximum capacity = {conveyor.capacity}")
             arm.content = None
