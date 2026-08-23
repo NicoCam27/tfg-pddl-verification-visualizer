@@ -79,53 +79,22 @@ class Renderer:
 
             self.screen.blit(text, rect)
 
-        
-#        # Dibujar Cajas
-#        if boxes is not None:
-#            for box in boxes:
-#
-#                # -------------------------------------------------
-#                # No dibujar cajas que lleva un dron
-#                # -------------------------------------------------
-#                if self.is_box_carried(box, drones):
-#                    continue
-#
-#                # -------------------------------------------------
-#                # No dibujar cajas que están dentro de un transportador
-#                # -------------------------------------------------
-#                if self.is_box_in_conveyor(box, conveyors):
-#                    continue
-#
-#                # -------------------------------------------------
-#                # Dibujar cajas que están libres
-#                # -------------------------------------------------
-#                if box.location not in self.location_positions:
-#                    continue
-#
-#                x, y = self.location_positions[box.location]
-#
-#                pygame.draw.rect(
-#                    self.screen,
-#                    (180, 120, 0),
-#                    (x - 10, y + 40, 20, 20)
-#                )
-                
 
         # Dibujar Cajas
         if boxes is not None:
 
             # ---------------------------------------------------------
-            # Agrupar las cajas por ubicación
+            # Agrupar todas las cajas por ubicación
             # ---------------------------------------------------------
             boxes_by_location = defaultdict(list)
 
             for box in boxes:
 
-                # No incluir cajas que lleva un dron
+                # No dibujar cajas que lleva un dron
                 if self.is_box_carried(box, drones):
                     continue
 
-                # No incluir cajas dentro de un transportador
+                # No dibujar cajas dentro de un transportador
                 if self.is_box_in_conveyor(box, conveyors):
                     continue
 
@@ -144,11 +113,22 @@ class Renderer:
 
                 x, y = self.location_positions[location]
 
-                # Dibujar todas las cajas de esta ubicación
-                for i, box in enumerate(boxes_in_location):
+                # -----------------------------------------------------
+                # Obtener solamente las cajas no entregadas
+                # -----------------------------------------------------
+                undelivered_boxes = [
+                    box
+                    for box in boxes_in_location
+                    if box.get_current_owner() is None
+                ]
 
-                    # Por ahora las dibujamos unas encima de otras
-                    # exactamente en la misma posición
+                undelivered_count = len(undelivered_boxes)
+
+                # -----------------------------------------------------
+                # Dibujar todas las cajas
+                # -----------------------------------------------------
+                for box in boxes_in_location:
+
                     box_rect = pygame.Rect(
                         x - 10,
                         y + 40,
@@ -156,117 +136,138 @@ class Renderer:
                         20
                     )
 
+                    # Color diferente dependiendo de si está entregada
+                    if box.get_current_owner() is None:
+                        # Caja no entregada
+                        box_color = (200, 135, 0)
+                    else:
+                        # Caja entregada
+                        box_color = (150, 100, 0)
+
                     pygame.draw.rect(
                         self.screen,
-                        (180, 120, 0),
+                        box_color,
                         box_rect
                     )
 
                 # -----------------------------------------------------
-                # Tooltip al pasar el ratón por encima de una caja
+                # Número de cajas no entregadas
+                # -----------------------------------------------------
+                if undelivered_count > 0:
+
+                    count_text = self.small_font.render(
+                        str(undelivered_count),
+                        True,
+                        (220, 0, 0)
+                    )
+
+                    # CENTRADO EXACTAMENTE EN EL CENTRO DE LA CAJA
+                    count_rect = count_text.get_rect(
+                        center=box_rect.center
+                    )
+
+                    self.screen.blit(
+                        count_text,
+                        count_rect
+                    )
+
+                # -----------------------------------------------------
+                # Tooltip
                 # -----------------------------------------------------
                 #
-                # Como todas las cajas están en la misma posición,
-                # cualquier caja de esa ubicación activa el tooltip.
+                # Solo aparece si hay cajas no entregadas
+                # y el ratón está encima de la caja.
                 #
-                box_rect = pygame.Rect(
-                    x - 10,
-                    y + 40,
-                    20,
-                    20
-                )
-
-                if box_rect.collidepoint(mouse_x, mouse_y):
+                if undelivered_count > 0 and box_rect.collidepoint(
+                    mouse_x,
+                    mouse_y
+                ):
 
                     lines = [
                         f"Cajas no entregadas en {location}:"
                     ]
 
-                    for box in boxes_in_location:
-                        if box.get_current_owner() is None:
-                            lines.append(
-                                f"{box.name} | {box.content}"
-                            )
-
-                    # Si hay cajas sin entregar, se muestra el tooltip
-                    if len(lines) > 1:
-
-                        padding = 6
-                        line_height = 20
-
-                        width = max(
-                            self.small_font.size(line)[0]
-                            for line in lines
-                        ) + padding * 2
-
-                        height = (
-                            len(lines) * line_height
-                            + padding * 2
+                    for box in undelivered_boxes:
+                        lines.append(
+                            f"{box.name} | {box.content}"
                         )
 
-                        tooltip_x = box_rect.right + 10
-                        tooltip_y = box_rect.top
+                    padding = 6
+                    line_height = 20
 
-                        # Evitar que salga por la derecha
-                        if tooltip_x + width > self.width:
-                            tooltip_x = (
-                                box_rect.left
-                                - width
-                                - 10
-                            )
+                    width = max(
+                        self.small_font.size(line)[0]
+                        for line in lines
+                    ) + padding * 2
 
-                        # Evitar que salga por abajo
-                        if tooltip_y + height > self.height:
-                            tooltip_y = (
-                                self.height
-                                - height
-                                - 10
-                            )
+                    height = (
+                        len(lines) * line_height
+                        + padding * 2
+                    )
 
-                        # Fondo
-                        pygame.draw.rect(
-                            self.screen,
-                            (255, 255, 220),
+                    tooltip_x = box_rect.right + 10
+                    tooltip_y = box_rect.top
+
+                    # Evitar que salga por la derecha
+                    if tooltip_x + width > self.width:
+                        tooltip_x = (
+                            box_rect.left
+                            - width
+                            - 10
+                        )
+
+                    # Evitar que salga por abajo
+                    if tooltip_y + height > self.height:
+                        tooltip_y = (
+                            self.height
+                            - height
+                            - 10
+                        )
+
+                    # Fondo
+                    pygame.draw.rect(
+                        self.screen,
+                        (255, 255, 220),
+                        (
+                            tooltip_x,
+                            tooltip_y,
+                            width,
+                            height
+                        )
+                    )
+
+                    # Borde
+                    pygame.draw.rect(
+                        self.screen,
+                        (0, 0, 0),
+                        (
+                            tooltip_x,
+                            tooltip_y,
+                            width,
+                            height
+                        ),
+                        1
+                    )
+
+                    # Texto
+                    for i, line in enumerate(lines):
+
+                        text = self.small_font.render(
+                            line,
+                            True,
+                            (0, 0, 0)
+                        )
+
+                        self.screen.blit(
+                            text,
                             (
-                                tooltip_x,
-                                tooltip_y,
-                                width,
-                                height
+                                tooltip_x + padding,
+                                tooltip_y
+                                + padding
+                                + i * line_height
                             )
                         )
 
-                        # Borde
-                        pygame.draw.rect(
-                            self.screen,
-                            (0, 0, 0),
-                            (
-                                tooltip_x,
-                                tooltip_y,
-                                width,
-                                height
-                            ),
-                            1
-                        )
-
-                        
-                        # Texto
-                        for i, line in enumerate(lines):
-
-                            text = self.small_font.render(
-                                line,
-                                True,
-                                (0, 0, 0)
-                            )
-
-                            self.screen.blit(
-                                text,
-                                (
-                                    tooltip_x + padding,
-                                    tooltip_y
-                                    + padding
-                                    + i * line_height
-                                )
-                            )
 
         # Dibujar transportadores
         if conveyors is not None:

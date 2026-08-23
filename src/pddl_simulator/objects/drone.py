@@ -58,22 +58,24 @@ class Drone:
             raise ValueError(f"the drone {self.name} is in location {self.location} but the box {box.name} is in location {box.location}")
                             
         arm_occupied = False
-        for arm_observed in self.arms:
-            if arm_observed == arm:
-                if arm_observed.content != "empty":
-                    arm_occupied = True
-                    raise ValueError(f"the arm {arm.name} is already occupied - it has {arm.content}")
+
+        if arm in self.arms:
+            if arm.content != "empty":
+                arm_occupied = True
+                raise ValueError(f"the arm {arm.name} is already occupied - it has {arm.content}")
+            else:
+                # Se verifica que la caja no está siendo sujetada por algún otro dron o está en algún transportador
+                if arm_occupied:
+                    raise ValueError(f"the arm {arm.name} is already occupied and can't pick up {box.name}")
+                if not box.try_pickup(self):
+                    raise ValueError(f"the box {box.name} can't be picked up, it is in {box.get_current_owner().name}")
                 else:
-                    # Se verifica que la caja no está siendo sujetada por algún otro dron o está en algún transportador
-                    if arm_occupied:
-                        raise ValueError(f"the arm {arm.name} is already occupied and can't pick up {box.name}")
-                    if not box.try_pickup(self):
-                        raise ValueError(f"the box {box.name} can't be picked up, it is in {box.get_current_owner().name}")
-                    else:
-                        arm.content = box
-                        print(f"The box {box.name} is now loaded in the arm {arm.name} of the drone {self.name}")
-                        return duration, cost
-        
+                    arm.content = box
+                    print(f"The box {box.name} is now loaded in the arm {arm.name} of the drone {self.name}")
+                    return duration, cost
+        else:
+            raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
+
 
     # Cuando se descarga una caja y se entrega a una persona,
 
@@ -90,39 +92,38 @@ class Drone:
         if not box.content in person.needs:
             raise ValueError(f"the person {person.name} does not need the content of the box {box.name} - it needs {person.needs} but the box has {box.content}")
 
-        for arm_observed in self.arms:
-            if arm_observed == arm:
-                if arm.content != box:
-                    raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
-                if not box.release(self):
-                    raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
-                arm.content = "empty"
-                box.location = self.location
-                if (not box.delivered_to(person)):
-                    raise ValueError(f"the box {box.name} couldn't be delivered to {person.name}, the box's owner is {box.get_current_owner().name}")
-                else:
-                    person.add_possesses(box)
-                    print(f"The box {box.name} has been unloaded from the arm {arm.name} of the drone {self.name} and given to the person {person.name}")
-                    return duration, cost
-            
-        raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
-        
+        if arm in self.arms:
+            if arm.content != box:
+                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
+            if not box.release(self):
+                raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
+            arm.content = "empty"
+            box.location = person.location
+            if (not box.delivered_to(person)):
+                raise ValueError(f"the box {box.name} couldn't be delivered to {person.name}, the box's owner is {box.get_current_owner().name}")
+            else:
+                person.add_possesses(box)
+                print(f"The box {box.name} has been unloaded from the arm {arm.name} of the drone {self.name} and given to the person {person.name}")
+                return duration, cost
+        else:
+            raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
+
 
     # Cuando se suelta una caja sin entregarla a una persona,
     # el brazo queda vacío y la caja queda en la ubicación del drone.
     def drop(self, arm, box, duration = 1, cost = 1):
-        for arm_observed in self.arms:
-            if arm_observed == arm:
-                if arm.content != box:
-                    raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
-                if not box.release(self):
-                    raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
+        if arm in self.arms:
+            if arm.content != box:
+                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
+            if not box.release(self):
+                raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
 
-                arm.content = "empty"
-                box.location = self.location
-                print(f"The box {box.name} has been dropped from the arm {arm.name} of the drone {self.name} in the location {self.location}")
-                return duration, cost
-        raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
+            arm.content = "empty"
+            box.location = self.location
+            print(f"The box {box.name} has been dropped from the arm {arm.name} of the drone {self.name} in the location {self.location}")
+            return duration, cost
+        else:
+            raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
 
 
     # Cuando se carga una caja en un transportador, se verifica que la caja,
@@ -139,31 +140,26 @@ class Drone:
         elif self.location != conveyor.location:
             raise ValueError(f"the drone {self.name} is not in the same location ({self.location}) the conveyor {conveyor.name} is in ({conveyor.location})")
 
-        for arm_observed in self.arms:
-            if arm_observed == arm:
-                if arm_observed.content != box:
-                    raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
-                if conveyor.get_number_of_boxes_inside() == conveyor.capacity:
-                    raise ValueError(f"the conveyor {conveyor.name} has reached its maximum capacity = {conveyor.capacity}")
-                arm.content = "empty"
-
-                # ---------------- es necesario hacer esto?
-                #box.location = self.location
-                # ----------------
-
-                # Se verifica que se haya podido cargar correctamente la caja en el transportador y de que no se está intentando
-                # meter una caja que ya está dentro del transportador.
-                if (not box.release(self)):
-                    raise ValueError(f"the box {box.name} is not owned by the drone {self.name}, it is owned by {box.get_current_owner().name}")
-                if (not box.try_pickup(conveyor)):
-                    raise ValueError(f"the box {box.name} can't be loaded into {conveyor.name}, it is owned by {box.get_current_owner().name}")
-                if (conveyor.add_box(box)):
-                    print(f"The box {box.name} has been loaded from the arm {arm.name} of the drone {self.name} into the conveyor {conveyor.name} which currently has {conveyor.get_number_of_boxes_inside()} boxes inside")
-                    return duration, cost
-                else:
-                    raise ValueError(f"the box {box.name} is not in {arm.name} - it is in {box.get_current_owner().name}")
-        raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
-
+        if arm in self.arms:
+            if arm.content != box:
+                raise ValueError(f"the arm {arm.name} isn't holding {box.name}. {box.get_current_owner().name} has the box")
+            if conveyor.get_number_of_boxes_inside() == conveyor.capacity:
+                raise ValueError(f"the conveyor {conveyor.name} has reached its maximum capacity = {conveyor.capacity}")
+            arm.content = "empty"
+            # Se verifica que se haya podido cargar correctamente la caja en el transportador y de que no se está intentando
+            # meter una caja que ya está dentro del transportador.
+            if (not box.release(self)):
+                raise ValueError(f"the box {box.name} is not owned by the drone {self.name}, it is owned by {box.get_current_owner().name}")
+            if (not box.try_pickup(conveyor)):
+                raise ValueError(f"the box {box.name} can't be loaded into {conveyor.name}, it is owned by {box.get_current_owner().name}")
+            if (conveyor.add_box(box)):
+                print(f"The box {box.name} has been loaded from the arm {arm.name} of the drone {self.name} into the conveyor {conveyor.name} which currently has {conveyor.get_number_of_boxes_inside()} boxes inside")
+                return duration, cost
+            else:
+                raise ValueError(f"the box {box.name} is not in {arm.name} - it is in {box.get_current_owner().name}")
+        else:
+            raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
+        
 
     # Cuando se descarga una caja de un transportador a un dron,
     # se verifica que la caja, el dron y el transportador
@@ -179,21 +175,21 @@ class Drone:
             raise ValueError(f"the drone {self.name} is in location {self.location} but the box {box.name} is in location {box.location}")
         elif self.location != conveyor.location:
             raise ValueError(f"the drone {self.name} is not in the same location ({self.location}) the conveyor {conveyor.name} is in ({conveyor.location})")
-        for arm_observed in self.arms:
-            if arm_observed == arm:
-                if arm_observed.content != "empty":
-                    raise ValueError(f"the arm {arm.name} is already occupied - it has {arm.content}")
-                if (not box.release(conveyor)):
-                    raise ValueError(f"the box {box.name} is not owned by the transporter {conveyor.name}, it is owned by {box.get_current_owner().name}")
-                if (not box.try_pickup(self)):
-                    raise ValueError(f"the box {box.name} can't be picked up by the drone {self.name}, it is owned by {box.get_current_owner().name}")
-                if (conveyor.remove_box(box)):
-                    arm.content = box.name
-                    print(f"The box {box.name} is now loaded in the arm {arm.name} of the drone {self.name}, the conveyor {conveyor.name} currently has {conveyor.get_number_of_boxes_inside()} boxes inside")
-                    return duration, cost
-                else:
-                    raise ValueError(f"The box {box.name} is not available to load")
-        raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
+        if arm in self.arms:
+            if arm.content != "empty":
+                raise ValueError(f"the arm {arm.name} is already occupied - it has {arm.content}")
+            if (not box.release(conveyor)):
+                raise ValueError(f"the box {box.name} is not owned by the transporter {conveyor.name}, it is owned by {box.get_current_owner().name}")
+            if (not box.try_pickup(self)):
+                raise ValueError(f"the box {box.name} can't be picked up by the drone {self.name}, it is owned by {box.get_current_owner().name}")
+            if (conveyor.remove_box(box)):
+                arm.content = box
+                print(f"The box {box.name} is now loaded in the arm {arm.name} of the drone {self.name}, the conveyor {conveyor.name} currently has {conveyor.get_number_of_boxes_inside()} boxes inside")
+                return duration, cost
+            else:
+                raise ValueError(f"The box {box.name} is not available to load")
+        else:
+            raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
 
 
     def __str__(self):
