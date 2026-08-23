@@ -41,6 +41,82 @@ class Renderer:
 
             self.location_positions[location] = (int(x), int(y))
 
+            
+    def get_render_positions(self, simulation, drones, conveyors=None):
+        positions = {}
+
+        # ---------------------------------------------------------
+        # Posición normal de los drones
+        # ---------------------------------------------------------
+        if drones is not None:
+            for drone in drones:
+                if drone is not None:
+                    if drone.location in self.location_positions:
+                        positions[drone] = self.location_positions[
+                            drone.location
+                        ]
+
+        # ---------------------------------------------------------
+        # Posición normal de los transportadores
+        #
+        # Cuando están en una ubicación y NO los transporta un dron,
+        # aparecen un poco separados del centro de la ubicación.
+        # ---------------------------------------------------------
+        if conveyors is not None:
+            for conveyor in conveyors:
+                if conveyor is not None:
+                    if conveyor.location in self.location_positions:
+                        x, y = self.location_positions[
+                            conveyor.location
+                        ]
+
+                        # Separación respecto al centro de la ubicación
+                        positions[conveyor] = (
+                            x - 50,
+                            y + 20
+                        )
+
+        # ---------------------------------------------------------
+        # Sobrescribir con posiciones interpoladas
+        # ---------------------------------------------------------
+        for action in simulation.active_actions:
+
+            action_type = action.data.get("action_type")
+
+            if action_type not in ("move", "move_conveyor"):
+                continue
+
+            drone = action.data["drone"]
+            origin = action.data["origin"]
+            destination = action.data["destination"]
+
+            progress = action.progress(simulation.simulation_time)
+
+            x0, y0 = self.location_positions[origin]
+            x1, y1 = self.location_positions[destination]
+
+            x = x0 + (x1 - x0) * progress
+            y = y0 + (y1 - y0) * progress
+
+            # El dron se mueve visualmente
+            positions[drone] = (x, y)
+
+            # -----------------------------------------------------
+            # Si el dron está transportando un transportador,
+            # el transportador va PEGADO al dron.
+            # -----------------------------------------------------
+            if action_type == "move_conveyor":
+                conveyor = action.data["conveyor"]
+
+                positions[conveyor] = (
+                    x,
+                    y
+                )
+
+        return positions
+
+    
+
     def is_box_carried(self, box, drones):
 
         if drones is None:
