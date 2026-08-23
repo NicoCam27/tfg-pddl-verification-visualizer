@@ -1,7 +1,7 @@
 #El objeto de tipo "drone" tiene "ubicacion" (un string) y "brazos" (puede tener uno o varios brazos,
 #                                                                   cada brazo puede tener una caja o no tener nada)
 class Drone:
-    def __init__(self, name, location = "", arms = None):
+    def __init__(self, name, location = None, arms = None):
 
         if arms is None:
             arms = []

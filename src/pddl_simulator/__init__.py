@@ -15,6 +15,7 @@ from .objects import (
     Conveyor,
     Person,
     Arm,
+    Location,
     reset_world,
 )
 
@@ -34,6 +35,7 @@ __all__ = [
     "Conveyor",
     "Person",
     "Arm",
+    "Location",
     "reset_world",
     "World",
 ]

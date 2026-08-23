@@ -5,7 +5,7 @@
 # possesses     -->   Box   /   lista de Box
 
 class Person:
-    def __init__(self, name, location = "", needs = None, possesses = None):
+    def __init__(self, name, location = None, needs = None, possesses = None):
         self.name = name
         self.location = location
 

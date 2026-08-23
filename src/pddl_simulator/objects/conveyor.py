@@ -2,7 +2,7 @@
 # y "ubicación" (un string)
 
 class Conveyor:
-    def __init__(self, name, capacity = None, boxes_inside = None, location = ""):
+    def __init__(self, name, capacity = None, boxes_inside = None, location = None):
 
         self.name = name
 

@@ -4,7 +4,7 @@ class Box:
     CARRIED = "carried"
     DELIVERED = "delivered"
 
-    def __init__(self, name, location = "", content = ""):
+    def __init__(self, name, location = None, content = ""):
         self.name = name
         self.location = location
         self.content = content

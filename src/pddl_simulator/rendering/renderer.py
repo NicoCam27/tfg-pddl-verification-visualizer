@@ -74,7 +74,7 @@ class Renderer:
 
             pygame.draw.circle(self.screen, (80,80,80), (x,y), 65)
 
-            text = self.font.render(location, True, (255,255,255))
+            text = self.font.render(location.name, True, (255,255,255))
             rect = text.get_rect(center=(x,y))
 
             self.screen.blit(text, rect)
@@ -445,22 +445,11 @@ class Renderer:
                             lines.append(person.name)
 
                         elif person.get_is_possesses_a_list():
-                            #box_found = False
                             if person.possesses_at_least_one_object():
                                 for element in person.possesses:
                                     lines.append(
                                         f"{person.name} | {element.name} | {element.content}"
                                     )
-                                    #box_found = True
-                                    #if element != "nothing":
-                                    #    lines.append(
-                                    #        f"{person.name} | {element.name} | {element.content}"
-                                    #    )
-                                    #    box_found = True
-
-                            #if not box_found:
-                            #    lines.append(person.name)
-
                         else:
                             box = person.possesses
                             
