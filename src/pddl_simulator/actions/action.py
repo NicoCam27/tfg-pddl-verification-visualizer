@@ -83,6 +83,3 @@ class Action:
             (simulation_time - self.start_execution_time)
             / self.duration
         )
-    
-    def get_data(self):
-        return self.data

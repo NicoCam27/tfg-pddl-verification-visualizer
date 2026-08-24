@@ -19,6 +19,47 @@ class World:
         )
 
 
+# HACER ESTO EN EL PROYECTO FINAL!!!!!!!
+
+# ---------------- IMPLEMENTAR ESTO PERO CON EL NUEVO TIPO DE actions creados ----------------------------
+# Por qué es importante implementar esto?
+#
+# Respuesta: Esta es una verificación para ver que todos los drones, transportadores y etc. que aparecen
+#            acciones se pasaron como objetos y que no falta nada 
+#
+#        # Se verifica que todos los objetos mencionados en action se han pasado correctamente a world
+#        for action in actions:
+#            action_type = action.get_data().get("action_type")
+#            if action_type == "move":
+#                if drones is None:
+#                    print("NO SE HAN PASADO DRONES")
+#                else:
+#                    if action.get_data().get("drone") in drones:
+#                        print("Se confirma que el dron ", action.get_data().get("drone").name, " se ha pasado en las listas")
+#                    else:
+#                        print("el drone: ", action.get_data().get("drone").name, " no se ha pasado en la lista de objetos")
+#            elif action_type == "move_conveyor":
+#                if drones is None:
+#                    print("NO SE HAN PASADO DRONES")
+#                elif conveyors is None:
+#                    print("NO SE HAN PASADO TRANSPORTADORES")
+#                else:
+#
+#                    if (action.get_data().get("drone") not in drones):
+#                        print("el drone: ", action.get_data().get("drone").name, " no se ha pasado en la lista de objetos")
+#                    if (action.get_data().get("conveyor") not in conveyors):
+#                        print("el transportador: ", action.get_data().get("conveyor").name, " no se ha pasado en la lista de objetos")
+#                    else:
+#                        print(
+#                            "Se confirma que el dron ",
+#                            action.get_data().get("drone").name,
+#                            " se ha pasado en las listas correctamente, al igual que el transportador ",
+#                            action.get_data().get("conveyor").name
+#                            )
+                        
+            #if list is not None:
+            #    print(action.get_data().get("drone"))
+
         running = True
 
 
@@ -48,8 +89,8 @@ class World:
             simulation.set_speed(control.slider.value)
             simulation.update(dt)
 
-            render_positions = simulation.get_render_positions(
-                renderer.location_positions, drones, conveyors
+            render_positions = renderer.get_render_positions(
+                simulation, drones, conveyors
             )
 
             renderer.draw(

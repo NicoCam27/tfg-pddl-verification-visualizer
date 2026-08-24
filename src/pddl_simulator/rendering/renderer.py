@@ -371,7 +371,7 @@ class Renderer:
                 # -------------------------------------------------
                 # Número de cajas dentro del transportador
                 # -------------------------------------------------
-                boxes_count = conveyor.get_number_of_boxes_inside()
+                boxes_count = conveyor.number_of_boxes_inside()
 
                 count_text = self.small_font.render(
                     str(boxes_count),

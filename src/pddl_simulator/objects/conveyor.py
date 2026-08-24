@@ -33,7 +33,7 @@ class Conveyor:
 
     
 
-    def get_number_of_boxes_inside(self):
+    def number_of_boxes_inside(self):
         return len(self.boxes_inside)
 
     def add_box(self, box):

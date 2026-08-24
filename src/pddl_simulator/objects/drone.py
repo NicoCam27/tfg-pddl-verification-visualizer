@@ -134,7 +134,7 @@ class Drone:
         if arm in self.arms:
             if arm.content != box:
                 raise ValueError(f"the arm {arm.name} isn't holding {box.name}. It is holding {arm.content}")
-            if conveyor.get_number_of_boxes_inside() == conveyor.capacity:
+            if conveyor.number_of_boxes_inside() == conveyor.capacity:
                 raise ValueError(f"the conveyor {conveyor.name} has reached its maximum capacity = {conveyor.capacity}")
             arm.content = None
             # Se verifica que se haya podido cargar correctamente la caja en el transportador y de que no se está intentando
@@ -144,7 +144,7 @@ class Drone:
             if (not box.try_pickup(conveyor)):
                 raise ValueError(f"the box {box.name} can't be loaded into {conveyor.name}, it is owned by {box.get_current_owner().name}")
             if (conveyor.add_box(box)):
-                print(f"The box {box.name} has been loaded from the arm {arm.name} of the drone {self.name} into the conveyor {conveyor.name} which currently has {conveyor.get_number_of_boxes_inside()} boxes inside")
+                print(f"The box {box.name} has been loaded from the arm {arm.name} of the drone {self.name} into the conveyor {conveyor.name} which currently has {conveyor.number_of_boxes_inside()} boxes inside")
                 return duration, cost
             else:
                 raise ValueError(f"the box {box.name} is not in {arm.name} - it is in {box.get_current_owner().name}")
@@ -175,7 +175,7 @@ class Drone:
                 raise ValueError(f"the box {box.name} can't be picked up by the drone {self.name}, it is owned by {box.get_current_owner().name}")
             if (conveyor.remove_box(box)):
                 arm.content = box
-                print(f"The box {box.name} is now loaded in the arm {arm.name} of the drone {self.name}, the conveyor {conveyor.name} currently has {conveyor.get_number_of_boxes_inside()} boxes inside")
+                print(f"The box {box.name} is now loaded in the arm {arm.name} of the drone {self.name}, the conveyor {conveyor.name} currently has {conveyor.number_of_boxes_inside()} boxes inside")
                 return duration, cost
             else:
                 raise ValueError(f"The box {box.name} is not available to load")
