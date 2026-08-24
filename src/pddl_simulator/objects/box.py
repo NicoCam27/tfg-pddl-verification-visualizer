@@ -37,6 +37,10 @@ class Box:
         self.__current_owner = person
         return True
 
+    def force_owner(self, obj, state=CARRIED):
+        self.__current_owner = obj
+        self.__state = state
+
     def __str__(self):
         return f"Box(name={self.name}, location={self.location}, content={self.content})"
     
