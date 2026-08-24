@@ -47,29 +47,33 @@ Ejemplo básico:
 ```python
 from pddl_simulator import *
 
-izq = Arm("izq", "empty")
-der = Arm("der", "empty")
+deposito = Location("deposito")
+ubicacion1 = Location("ubicacion1")
+ubicacion2 = Location("ubicacion2")
 
-dron1 = Drone("dron1", "deposito", [izq, der])
+ubicaciones = [deposito, ubicacion1, ubicacion2]
 
-caja1 = Box("caja1", "deposito", "comida")
-caja2 = Box("caja2", "deposito", "medicina")
+izq = Arm("izq",)
+der = Arm("der")
 
-persona1 = Person("persona1", "ubicacion1", "comida", "nothing")
-persona2 = Person("persona2", "ubicacion2", "medicina", "nothing")
+dron1 = Drone("dron1", deposito, [izq, der])
 
-ubicaciones = ['deposito', 'ubicacion1', 'ubicacion2']
+caja1 = Box("caja1", deposito, "comida")
+caja2 = Box("caja2", deposito, "medicina")
+
+persona1 = Person("persona1", ubicacion1, "comida")
+persona2 = Person("persona2", ubicacion2, "medicina")
 
 contenidos = ['comida', 'medicina']
 
 actions = [
-	create_action_load(dron1, "izq", caja1, 0, 1, 1),
-	create_action_load(dron1, "der", caja2, 1, 1, 1),
-	create_action_move(dron1, "deposito", "ubicacion1", 2, 1, 1),
-	create_action_unload(dron1, "izq", caja1, persona1, 3, 1, 1),
-	create_action_move(dron1, "ubicacion1", "ubicacion2", 4, 1, 1),
-	create_action_unload(dron1, "der", caja2, persona2, 5, 1, 1),
-	create_action_move(dron1, "ubicacion2", "deposito", 6, 1, 1)
+	create_action_load(dron1, izq, caja1, 0, 1, 1),
+	create_action_load(dron1, der, caja2, 1, 1, 1),
+	create_action_move(dron1, deposito, ubicacion1, 2, 1, 1),
+	create_action_unload(dron1, izq, caja1, persona1, 3, 1, 1),
+	create_action_move(dron1, ubicacion1, ubicacion2, 4, 1, 1),
+	create_action_unload(dron1, der, caja2, persona2, 5, 1, 1),
+	create_action_move(dron1, ubicacion2, deposito, 6, 1, 1)
 ]
 
 drones=[dron1]
