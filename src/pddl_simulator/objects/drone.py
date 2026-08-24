@@ -83,7 +83,12 @@ class Drone:
     def unload(self, arm, box, person, duration = 1, cost = 1):
         if self.location != person.location:
             raise ValueError(f"the drone {self.name} is in location {self.location} but the person {person.name} is in location {person.location}")
-        if not box.content in person.needs:
+        # "needs" puede ser una lista de contenidos o un único contenido (str),
+        if type(person.needs) == list:
+            needs_content = box.content in person.needs
+        else:
+            needs_content = person.needs is not None and box.content == person.needs
+        if not needs_content:
             raise ValueError(f"the person {person.name} does not need the content of the box {box.name} - it needs {person.needs} but the box has {box.content}")
 
         if arm in self.arms:
@@ -91,14 +96,12 @@ class Drone:
                 raise ValueError(f"the arm {arm.name} isn't holding {box.name}. It is holding {arm.content}")
             if not box.release(self):
                 raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
-            if not box.delivered_to(person):
-                raise ValueError(f"the box {box.name} couldn't be delivered to {person.name}, the box's owner is {box.get_current_owner().name}")
-            else:
-                arm.content = None
-                box.location = person.location
-                person.add_possesses(box)
-                print(f"The box {box.name} has been unloaded from the arm {arm.name} of the drone {self.name} and given to the person {person.name}")
-                return duration, cost
+            box.delivered_to(person)
+            arm.content = None
+            box.location = person.location
+            person.add_possesses(box)
+            print(f"The box {box.name} has been unloaded from the arm {arm.name} of the drone {self.name} and given to the person {person.name}")
+            return duration, cost
         else:
             raise ValueError(f"the drone {self.name} does not have an arm called {arm.name}")
 
@@ -144,8 +147,7 @@ class Drone:
             # no se está intentando meter una caja que ya está dentro del transportador.
             if (not box.release(self)):
                 raise ValueError(f"the box {box.name} is not owned by the drone {self.name}, it is owned by {box.get_current_owner().name}")
-            if (not box.try_pickup(conveyor)):
-                raise ValueError(f"the box {box.name} can't be loaded into {conveyor.name}, it is owned by {box.get_current_owner().name}")
+            box.try_pickup(conveyor)
             if (not conveyor.add_box(box)):
                 raise ValueError(f"the box {box.name} is already loaded in {conveyor.name}")
             else:
@@ -175,8 +177,7 @@ class Drone:
                 raise ValueError(f"the arm {arm.name} is already occupied - it has {arm.content}")
             if (not box.release(conveyor)):
                 raise ValueError(f"the box {box.name} is not owned by the transporter {conveyor.name}, it is owned by {box.get_current_owner().name}")
-            if (not box.try_pickup(self)):
-                raise ValueError(f"the box {box.name} can't be picked up by the drone {self.name}, it is owned by {box.get_current_owner().name}")
+            box.try_pickup(self)
             if (not conveyor.remove_box(box)):
                 raise ValueError(f"the box {box.name} is not in {conveyor.name}")
             else:
