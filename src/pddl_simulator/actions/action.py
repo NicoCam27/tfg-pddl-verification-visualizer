@@ -7,7 +7,7 @@ class Action:
         action_type=None,
         data=None,
         description="",
-        on_start=None 
+        on_finish=None 
     ):
 
         # Información temporal
@@ -24,7 +24,7 @@ class Action:
         
 
         # Callbacks
-        self.on_start = on_start
+        self.on_finish = on_finish
 
         # Información para el usuario
         self.description = description
@@ -43,25 +43,28 @@ class Action:
         self.start_execution_time = None
         self.end_time = None
 
-    def start_execution(self, simulation_time):
-        try:
-            # Primero ejecutamos la acción lógica
-            if self.on_start is not None:
-                self.on_start()
 
-            # Solo si no hubo error consideramos iniciada la acción
+    def start_execution(self, simulation_time):
+
             self.started = True
+
             self.start_execution_time = simulation_time
+
             self.end_time = simulation_time + self.duration
 
+    def finish_execution(self):
+        
+        try:
+
+            if self.on_finish is not None:
+                self.on_finish()
+
+            self.finished = True
             return None
 
         except ValueError as e:
             return str(e)
-
-    def finish_execution(self):
-        self.finished = True
-        return None
+        
 
     def is_running(self):
 
@@ -73,9 +76,6 @@ class Action:
             return 0.0
 
         if self.finished:
-            return 1.0
-
-        if self.duration <= 0:
             return 1.0
         
         return min(

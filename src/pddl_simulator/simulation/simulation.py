@@ -59,16 +59,17 @@ class Simulation:
 
 
     def start_action(self, action):
-        error = action.start_execution(self.simulation_time)
 
-        if error is not None:
-            self.set_error(error)
-            return
+        action.start_execution(self.simulation_time)
 
         self.active_actions.append(action)
+
         self.last_action_description = action.description
 
+
+
     def finish_action(self, action):
+
         error = action.finish_execution()
 
         if error is not None:
