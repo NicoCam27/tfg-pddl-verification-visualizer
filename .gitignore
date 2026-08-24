@@ -219,4 +219,4 @@ __marimo__/
 
 
 src/pddl_simulator/codegen
-src/pddl_simulator/tests/tests_private
+tests/tests_private
