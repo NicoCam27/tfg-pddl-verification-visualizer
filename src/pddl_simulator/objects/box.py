@@ -14,7 +14,7 @@ class Box:
         self.__initial_location = location
 
     def try_pickup(self, obj):
-        if self.__state != self.AVAILABLE and self.__state != self.DELIVERED:
+        if self.__state != self.AVAILABLE:
             return False
 
         self.__state = self.CARRIED
@@ -30,7 +30,7 @@ class Box:
         return True
     
     def delivered_to(self, person):
-        if self.__state != self.AVAILABLE and self.__state != self.DELIVERED:
+        if self.__state != self.AVAILABLE:
             return False
 
         self.__state = self.DELIVERED

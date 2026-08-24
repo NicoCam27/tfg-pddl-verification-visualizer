@@ -77,7 +77,6 @@ class Person:
         else:
             self.possesses = object
 
-
         # Se satisface la necesidad de ese contenido y se elimina esa neceisdad
         if self.__needs_is_a_list:
             self.needs.remove(object.content)

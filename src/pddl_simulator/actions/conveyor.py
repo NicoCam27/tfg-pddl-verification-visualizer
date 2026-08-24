@@ -1,13 +1,13 @@
 from .action import Action 
 
 
-def create_action_move_conveyor(drone, conveyor, origin, destination, start, duration = 1, cost = 1, description=""):
+def create_action_move_conveyor(drone, conveyor, arm, origin, destination, start, duration = 1, cost = 1, description=""):
 
     if description == "":
-        description = f'{drone.name}.move_conveyor(conveyor={conveyor.name}, origin="{origin}", destination="{destination}", duration={duration}, cost={cost})'
+        description = f'{drone.name}.move_conveyor(conveyor={conveyor.name}, arm={arm.name}, origin="{origin}", destination="{destination}", duration={duration}, cost={cost})'
  
-    data = {"action_type": "move_conveyor", "drone": drone, "conveyor": conveyor, "origin": origin, "destination": destination}
-    return Action(start=start, duration=duration, description=description, action_type="move_conveyor", data=data, on_start=lambda: drone.move_conveyor(conveyor, origin, destination, duration, cost))
+    data = {"action_type": "move_conveyor", "drone": drone, "conveyor": conveyor, "arm": arm, "origin": origin, "destination": destination}
+    return Action(start=start, duration=duration, description=description, action_type="move_conveyor", data=data, on_start=lambda: drone.move_conveyor(conveyor, arm, origin, destination, duration, cost))
 
     
 def create_action_load_conveyor_with_box(drone, arm, box, conveyor, start, duration = 1, cost = 1, description=""):
