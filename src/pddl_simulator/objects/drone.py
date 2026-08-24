@@ -10,12 +10,18 @@ from .person import Person
 class Drone:
     def __init__(self, name, location = None, arms = None):
 
+        if location is not None and not isinstance(location, Location):
+            raise TypeError(f"'location' must be a Location object, got {location!r}")
+        
         if arms is None:
             arms = []
 
         self.name = name
         if len(arms) == len(set(arms)):
-            self.arms = arms
+            if all(isinstance(arm, Arm) for arm in arms):
+                self.arms = arms[:]
+            else:
+                raise TypeError(f"'arms' must be a list containing only Arm objects.")
         else:
             raise Exception("Los brazos de un dron deben ser únicos, un brazo específico no puede aparecer mas de una vez")
 
@@ -248,7 +254,10 @@ class Drone:
         return f"Drone(name={self.name}, location={self.location}, arms=\n{infoArms})"
     
     def add_arm(self, arm):
-        self.arms.append(arm)
+        if not isinstance(arm, Arm):
+            raise TypeError(f"'arm' must be an Arm object, got {arm!r}")
+        else:
+            self.arms.append(arm)
 
     @property
     def location(self):
@@ -256,13 +265,16 @@ class Drone:
 
     @location.setter
     def location(self, new_location):
-        self._location = new_location
-        for arm in self.arms:
-            if arm.content is not None:
-                arm.content.location = new_location
+        if new_location is not None and not isinstance(new_location, Location):
+            raise ValueError(f"'new_location' must be a Location object, got {new_location!r}")
+        else:
+            self._location = new_location
+            for arm in self.arms:
+                if arm.content is not None:
+                    arm.content.location = new_location
 
     #RESET
     def reset(self):
-        self.location = self.__initial_location
         for arm in self.arms:
             arm.reset()
+        self.location = self.__initial_location

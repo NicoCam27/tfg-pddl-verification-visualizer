@@ -636,7 +636,7 @@ class Renderer:
 
                     # Información de la caja
                     txt = self.small_font.render(
-                        f"{arm.name} | {arm.content.name}",
+                        f"{arm.name} | {box.name}",
                         True,
                         (150, 0, 0)
                     )

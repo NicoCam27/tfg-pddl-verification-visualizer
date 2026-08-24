@@ -1,3 +1,5 @@
+from .location import Location
+
 #El objeto de tipo "caja" tiene "ubicacion" (un string) y "contenido" (puede ser un string o vacío)
 class Box:
     AVAILABLE = "available"
@@ -6,6 +8,10 @@ class Box:
 
     def __init__(self, name, location = None, content = ""):
         self.name = name
+        
+        if location is not None and not isinstance(location, Location):
+            raise TypeError(f"'location' must be a Location object, got {location!r}")
+        
         self.location = location
         self.content = content
         self.__state = self.AVAILABLE

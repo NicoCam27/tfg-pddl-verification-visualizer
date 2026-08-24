@@ -1,3 +1,6 @@
+from .box import Box
+from .location import Location
+
 #El objeto de tipo "transportador" tiene "capacidad" (un entero), "cajas dentro" (una lista de cajas)
 # y "ubicación" (un string)
 
@@ -13,6 +16,9 @@ class Conveyor:
         else:
             raise ValueError(f"the capacity of a conveyor must be a positive integer larger than 0")
 
+        if location is not None and not isinstance(location, Location):
+            raise TypeError(f"'location' must be a Location object, got {location!r}")
+
         if boxes_inside is None:
             self.boxes_inside = []
             self.__initial_boxes_inside = []
@@ -21,14 +27,18 @@ class Conveyor:
                 if len(boxes_inside) > self.capacity:
                     raise ValueError(f"the conveyor {self.name} is initialized with {len(boxes_inside)} boxes inside, which exceeds its maximum capacity of {self.capacity}")
                 else:
-                    self.boxes_inside = boxes_inside
-                    for box in self.boxes_inside:
-                        box.force_owner(self)
+                    if all(isinstance(box, Box) for box in boxes_inside):
+                        self.boxes_inside = boxes_inside[:]
+                        for box in self.boxes_inside:
+                            box.force_owner(self)
 
-                    self.__initial_boxes_inside = boxes_inside[:]
+                        self.__initial_boxes_inside = boxes_inside[:]
+                    else:
+                        raise TypeError(f"'boxes_inside' must be a list containing only Box objects.")
             else:
                 raise Exception("The boxes inside a conveyor must be unique, a specific box cannot appear more than once")
-        
+
+
         self._location = location
 
         self.__current_owner = None
@@ -42,6 +52,8 @@ class Conveyor:
         return len(self.boxes_inside)
 
     def add_box(self, box):
+        if not isinstance(box, Box):
+            raise ValueError(f"the conveyor {self.name} expected a Box object for 'box' but got {box!r}")
         if box not in self.boxes_inside and (self.number_of_boxes_inside() + 1) <= self.capacity:
             self.boxes_inside.append(box)
             return True

@@ -1,3 +1,7 @@
+from .location import Location
+from .box import Box
+
+
 # -------------------------------------- LA MAYORIA DE LOS TRABAJOS NO TIENEN "NECESITA" Y SOLO TIENEN "POSEE"
 #El objeto de tipo "persona" tiene "ubicacion" (un string), "necesidad" (un contenido como los que tienen las cajas) y "posee" (puede tener una caja, varias, o no tener nada)
 
@@ -6,6 +10,10 @@
 
 class Person:
     def __init__(self, name, location = None, needs = None, possesses = None):
+
+        if location is not None and not isinstance(location, Location):
+            raise TypeError(f"'location' must be a Location object, got {location!r}")
+
         self.name = name
         self.location = location
 
@@ -16,20 +24,28 @@ class Person:
 
 
         if (type(needs) == list):
-            self.__initial_needs = needs[:]
-            self.__needs_is_a_list = True
+            if all(isinstance(need, str) for need in needs):
+                self.needs = needs[:]
+                self.__initial_needs = needs[:]
+                self.__needs_is_a_list = True
+            else:
+                raise TypeError(f"'needs' must be a list of strings.")
         else:
+            self.needs = needs
             self.__initial_needs = needs
 
+
         if (type(possesses) == list):
-            self.__initial_possesses = possesses[:]
-            self.__possesses_is_a_list = True
+            if all(isinstance(possess, Box) for possess in possesses):
+                self.possesses = possesses[:]
+                self.__initial_possesses = possesses[:]
+                self.__possesses_is_a_list = True
+            else:
+                raise TypeError(f"'possesses' must be a list containing only Box objects.")
         else:
+            self.possesses = possesses
             self.__initial_possesses = possesses
         
-
-        self.needs = needs
-        self.possesses = possesses
 
 
     def convert_needs_to_list(self):
@@ -44,9 +60,11 @@ class Person:
 
 
     def add_needs(self, needs):
+        if not isinstance(needs, str):
+            raise ValueError(f"the person {self.name} expected a string for 'needs' but got {needs!r}")
+
         # Si se sabe que hay más de una necesidad para una persona, se agrega a la lista de needs
         if self.__needs_is_a_list:
-
             self.needs.append(needs)
 
         # Si se descubre que una persona tiene más de una necesidad, se crea una lista de necesidades y se agrega la necesidad
@@ -61,25 +79,37 @@ class Person:
             self.needs = needs
 
 
-    def add_possesses(self, object):
-        # Ahora la persona tiene al menos un objeto
-        self.__possesses_at_least_one_object = True
+    def add_possesses(self, box):
+        if not isinstance(box, Box):
+            raise ValueError(f"the person {self.name} can only possess one or more Box objects,  got {box!r}")
 
         if self.__possesses_is_a_list:
-            self.possesses.append(object)
+            if not box.content in self.needs:
+                raise ValueError(f"the person {self.name} does not need the content of the box {box.name} - it needs {self.needs} but the box has {box.content}")
+
+            self.possesses.append(box)
 
         # Si la persona ya tiene un objeto, se convierte possesses en una lista y se añade el nuevo objeto
         elif self.possesses is not None:
+            if not box.content == self.needs:
+                raise ValueError(f"the person {self.name} does not need the content of the box {box.name} - it needs {self.needs} but the box has {box.content}")
+
             self.convert_possesses_to_list()
-            self.possesses.append(object)
+            self.possesses.append(box)
 
         # Si la persona no ha tenido ningún objeto anteriormente, se le asigna este objeto directamente
         else:
-            self.possesses = object
+            if not box.content == self.needs:
+                raise ValueError(f"the person {self.name} does not need the content of the box {box.name} - it needs {self.needs} but the box has {box.content}")
+            
+            self.possesses = box
+
+        # Ahora la persona tiene al menos un objeto
+        self.__possesses_at_least_one_object = True
 
         # Se satisface la necesidad de ese contenido y se elimina esa neceisdad
         if self.__needs_is_a_list:
-            self.needs.remove(object.content)
+            self.needs.remove(box.content)
         else:
             self.needs = None
 
