@@ -65,6 +65,12 @@ class Action:
         except ValueError as e:
             return str(e)
         
+        except TypeError as e:
+            return str(e)
+
+        except Exception as e:
+            return str(e)
+        
 
     def is_running(self):
 
