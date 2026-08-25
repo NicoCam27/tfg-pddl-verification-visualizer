@@ -40,8 +40,6 @@ class Person:
                 self.possesses = possesses[:]
                 self.__initial_possesses = possesses[:]
                 self.__possesses_is_a_list = True
-                # Una persona que ya empieza con alguna caja posee al menos un objeto.
-                # reset() aplica esta misma regla para no contradecir a la construcción.
                 self.__possesses_at_least_one_object = len(possesses) > 0
             else:
                 raise TypeError(f"'possesses' must be a list containing only Box objects.")
@@ -133,8 +131,6 @@ class Person:
             self.__needs_is_a_list = False
             self.needs = self.__initial_needs
 
-        # La asignación es incondicional (no un "if ... = True") para que el flag también
-        # vuelva a False cuando el estado inicial no tenía ninguna caja.
         if (type(self.__initial_possesses) == list):
             self.possesses = self.__initial_possesses[:]
             self.__possesses_at_least_one_object = len(self.__initial_possesses) > 0
