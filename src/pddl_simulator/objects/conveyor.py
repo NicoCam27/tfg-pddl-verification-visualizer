@@ -19,6 +19,8 @@ class Conveyor:
         if location is not None and not isinstance(location, Location):
             raise TypeError(f"'location' must be a Location object, got {location!r}")
 
+        self._location = location
+
         if boxes_inside is None:
             self.boxes_inside = []
             self.__initial_boxes_inside = []
@@ -31,6 +33,7 @@ class Conveyor:
                         self.boxes_inside = boxes_inside[:]
                         for box in self.boxes_inside:
                             box.force_owner(self)
+                            box.location = self._location
 
                         self.__initial_boxes_inside = boxes_inside[:]
                     else:
@@ -38,8 +41,6 @@ class Conveyor:
             else:
                 raise Exception("The boxes inside a conveyor must be unique, a specific box cannot appear more than once")
 
-
-        self._location = location
 
         self.__current_owner = None
 
@@ -93,6 +94,9 @@ class Conveyor:
 
     @location.setter
     def location(self, new_location):
+        if new_location is not None and not isinstance(new_location, Location):
+            raise TypeError(f"'location' must be a Location object, got {new_location!r}")
+
         self._location = new_location
         for box in self.boxes_inside:
             box.location = new_location

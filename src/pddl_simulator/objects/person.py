@@ -40,11 +40,15 @@ class Person:
                 self.possesses = possesses[:]
                 self.__initial_possesses = possesses[:]
                 self.__possesses_is_a_list = True
+                # Una persona que ya empieza con alguna caja posee al menos un objeto.
+                # reset() aplica esta misma regla para no contradecir a la construcción.
+                self.__possesses_at_least_one_object = len(possesses) > 0
             else:
                 raise TypeError(f"'possesses' must be a list containing only Box objects.")
         else:
             self.possesses = possesses
             self.__initial_possesses = possesses
+            self.__possesses_at_least_one_object = possesses is not None
         
 
 
@@ -83,25 +87,23 @@ class Person:
         if not isinstance(box, Box):
             raise ValueError(f"the person {self.name} can only possess one or more Box objects,  got {box!r}")
 
-        if self.__possesses_is_a_list:
-            if not box.content in self.needs:
-                raise ValueError(f"the person {self.name} does not need the content of the box {box.name} - it needs {self.needs} but the box has {box.content}")
+        if isinstance(self.needs, list):
+            needs_content = box.content in self.needs
+        else:
+            needs_content = self.needs is not None and box.content == self.needs
+        if not needs_content:
+            raise ValueError(f"the person {self.name} does not need the content of the box {box.name} - it needs {self.needs} but the box has {box.content}")
 
+        if self.__possesses_is_a_list:
             self.possesses.append(box)
 
         # Si la persona ya tiene un objeto, se convierte possesses en una lista y se añade el nuevo objeto
         elif self.possesses is not None:
-            if not box.content == self.needs:
-                raise ValueError(f"the person {self.name} does not need the content of the box {box.name} - it needs {self.needs} but the box has {box.content}")
-
             self.convert_possesses_to_list()
             self.possesses.append(box)
 
         # Si la persona no ha tenido ningún objeto anteriormente, se le asigna este objeto directamente
         else:
-            if not box.content == self.needs:
-                raise ValueError(f"the person {self.name} does not need the content of the box {box.name} - it needs {self.needs} but the box has {box.content}")
-            
             self.possesses = box
 
         # Ahora la persona tiene al menos un objeto
@@ -131,8 +133,12 @@ class Person:
             self.__needs_is_a_list = False
             self.needs = self.__initial_needs
 
+        # La asignación es incondicional (no un "if ... = True") para que el flag también
+        # vuelva a False cuando el estado inicial no tenía ninguna caja.
         if (type(self.__initial_possesses) == list):
             self.possesses = self.__initial_possesses[:]
+            self.__possesses_at_least_one_object = len(self.__initial_possesses) > 0
         else:
             self.__possesses_is_a_list = False
             self.possesses = self.__initial_possesses
+            self.__possesses_at_least_one_object = self.__initial_possesses is not None

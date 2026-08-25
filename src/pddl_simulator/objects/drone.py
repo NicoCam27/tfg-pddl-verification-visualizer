@@ -133,12 +133,16 @@ class Drone:
         if arm in self.arms:
             if arm.content != box:
                 raise ValueError(f"the arm {arm.name} isn't holding {box.name}. It is holding {arm.content}")
-            if not box.release(self):
+            if box.get_current_owner() != self:
                 raise ValueError(f"the box {box.name} is not owned by the drone {self.name}")
+
+            # add_possesses valida la necesidad y es lo último que puede fallar,
+            # por lo que va antes de las mutaciones sobre la caja y el brazo.
+            person.add_possesses(box)
+            box.release(self)
             box.delivered_to(person)
             arm.content = None
             box.location = person.location
-            person.add_possesses(box)
             print(f"The box {box.name} has been unloaded from the arm {arm.name} of the drone {self.name} and given to the person {person.name}")
             return duration, cost
         else:
@@ -256,6 +260,9 @@ class Drone:
     def add_arm(self, arm):
         if not isinstance(arm, Arm):
             raise TypeError(f"'arm' must be an Arm object, got {arm!r}")
+        
+        if arm in self.arms:
+            raise TypeError(f"the arms of a drone must be unique, a drone can't have the same arm more than once ({arm.name})")
         else:
             self.arms.append(arm)
 
